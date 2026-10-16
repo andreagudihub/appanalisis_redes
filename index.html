@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esencia & Poder | Tablero de Contenido</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f472b6',
+                            400: '#ec4899',
+                            500: '#db2777',
+                            600: '#be185d',
+                            gold: '#c5a059',
+                            goldLight: '#fdf8f0',
+                            dark: '#2d1524'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fff1f2 50%, #fdf8f0 100%);
+            color: #2d1524;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 pb-6 border-b border-pink-200 gap-4">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold bg-brand-goldLight px-3 py-1 rounded-full border border-brand-gold/30">Dashboard de Contenido & Propósito</span>
+                <h1 class="text-3xl sm:text-4xl font-serif font-bold text-brand-dark mt-2">✨ Esencia & Poder</h1>
+                <p class="text-sm text-gray-600 mt-1">Crea, inspira y mide tu impacto con elegancia.</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="openModal()" class="bg-gradient-to-r from-brand-400 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white px-5 py-2.5 rounded-full font-medium shadow-lg shadow-brand-500/25 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Nueva Publicación
+                </button>
+                <button onclick="exportToNotionCSV()" class="bg-white hover:bg-brand-50 text-brand-dark px-4 py-2.5 rounded-full font-medium border border-pink-200 shadow-sm transition-all text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv text-brand-400"></i> Exportar a Notion
+                </button>
+            </div>
+        </header>
+
+        <!-- Resumen de Estadísticas Globales -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Publicaciones</p>
+                <p id="stat-total" class="text-3xl font-serif font-bold text-brand-dark mt-1">0</p>
+            </div>
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Alcance Total</p>
+                <p id="stat-reach" class="text-3xl font-serif font-bold text-brand-dark mt-1">0</p>
+            </div>
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Interacciones Total</p>
+                <p id="stat-interactions" class="text-3xl font-serif font-bold text-brand-dark mt-1">0</p>
+            </div>
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Engagement Promedio</p>
+                <p id="stat-engagement" class="text-3xl font-serif font-bold text-brand-500 mt-1">0%</p>
+            </div>
+        </div>
+
+        <!-- Grilla de Publicaciones -->
+        <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <!-- Estado vacío -->
+        <div id="empty-state" class="hidden text-center py-16 glass-card rounded-3xl mt-4">
+            <div class="w-16 h-16 bg-brand-100 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <h3 class="text-xl font-serif font-bold text-brand-dark">Tu tablero está listo para brillar</h3>
+            <p class="text-gray-500 text-sm mt-1 max-w-sm mx-auto">Agrega tu primer enlace de publicación y completa tus métricas con facilidad.</p>
+            <button onclick="openModal()" class="mt-5 bg-brand-dark text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-brand-600 transition-all">
+                Añadir primer post
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar / Editar Post -->
+    <div id="post-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card bg-white/95 w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modal-title" class="text-2xl font-serif font-bold text-brand-dark">Nueva Publicación</h2>
+                <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-brand-50 text-gray-500 hover:text-brand-500 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="post-form" onsubmit="savePost(event)">
+                <input type="hidden" id="post-id">
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Enlace de la Publicación</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="post-url" required placeholder="https://www.instagram.com/p/..." 
+                            class="flex-1 px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white/80 text-sm">
+                        <button type="button" onclick="fetchMetadata()" id="fetch-btn"
+                            class="bg-brand-gold text-white px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-bolt"></i> Cargar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">URL de Imagen</label>
+                        <input type="text" id="post-image" placeholder="Se llena solo o pon link" 
+                            class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white/80 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Fecha de Publicación</label>
+                        <input type="date" id="post-date" 
+                            class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white/80 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Plataforma</label>
+                        <select id="post-platform" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white/80 text-xs">
+                            <option value="Instagram">Instagram</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Descripción / Copy</label>
+                    <textarea id="post-caption" rows="2" placeholder="Texto del posteo..." 
+                        class="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white/80 text-sm"></textarea>
+                </div>
+
+                <hr class="border-pink-100 my-5">
+                <p class="text-xs font-semibold text-brand-gold uppercase tracking-widest mb-3">Estadísticas & Métricas</p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Alcance / Vistas</label>
+                        <input type="number" id="stat-reach-input" value="0" min="0" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Me gusta (Likes)</label>
+                        <input type="number" id="stat-likes-input" value="0" min="0" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Comentarios</label>
+                        <input type="number" id="stat-comments-input" value="0" min="0" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Guardados</label>
+                        <input type="number" id="stat-saves-input" value="0" min="0" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Clics en Link</label>
+                        <input type="number" id="stat-clicks-input" value="0" min="0" class="w-full px-3 py-2 rounded-xl border border-pink-200 focus:outline-none focus:border-brand-400 bg-white text-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all">Cancelar</button>
+                    <button type="submit" class="bg-gradient-to-r from-brand-400 to-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-md hover:from-brand-500 hover:to-brand-600 transition-all">Guardar Publicación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script de Funcionalidad -->
+    <script>
+        let posts = JSON.parse(localStorage.getItem('esencia_posts')) || [];
+
+        function init() {
+            renderPosts();
+            updateStats();
+        }
+
+        function openModal(id = null) {
+            const modal = document.getElementById('post-modal');
+            const form = document.getElementById('post-form');
+            form.reset();
+            document.getElementById('post-id').value = '';
+            
+            if (id) {
+                document.getElementById('modal-title').innerText = 'Editar Publicación';
+                const post = posts.find(p => p.id === id);
+                if (post) {
+                    document.getElementById('post-id').value = post.id;
+                    document.getElementById('post-url').value = post.url || '';
+                    document.getElementById('post-image').value = post.image || '';
+                    document.getElementById('post-date').value = post.date || '';
+                    document.getElementById('post-platform').value = post.platform || 'Instagram';
+                    document.getElementById('post-caption').value = post.caption || '';
+                    document.getElementById('stat-reach-input').value = post.reach || 0;
+                    document.getElementById('stat-likes-input').value = post.likes || 0;
+                    document.getElementById('stat-comments-input').value = post.comments || 0;
+                    document.getElementById('stat-saves-input').value = post.saves || 0;
+                    document.getElementById('stat-clicks-input').value = post.clicks || 0;
+                }
+            } else {
+                document.getElementById('modal-title').innerText = 'Nueva Publicación';
+                document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('post-modal').classList.add('hidden');
+        }
+
+        async function fetchMetadata() {
+            const url = document.getElementById('post-url').value.trim();
+            const btn = document.getElementById('fetch-btn');
+            if (!url) {
+                alert('Por favor ingresa un enlace válido primero.');
+                return;
+            }
+
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cargando...`;
+            try {
+                const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    if (data.data.image && data.data.image.url) {
+                        document.getElementById('post-image').value = data.data.image.url;
+                    }
+                    if (data.data.description) {
+                        document.getElementById('post-caption').value = data.data.description;
+                    } else if (data.data.title) {
+                        document.getElementById('post-caption').value = data.data.title;
+                    }
+
+                    if (url.includes('instagram.com')) document.getElementById('post-platform').value = 'Instagram';
+                    else if (url.includes('tiktok.com')) document.getElementById('post-platform').value = 'TikTok';
+                    else if (url.includes('youtube.com') || url.includes('youtu.be')) document.getElementById('post-platform').value = 'YouTube';
+                    else if (url.includes('linkedin.com')) document.getElementById('post-platform').value = 'LinkedIn';
+                } else {
+                    alert('No se pudo extraer información automática, pero puedes rellenar los datos manualmente.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error al conectar con el servicio de extracción.');
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Cargar`;
+            }
+        }
+
+        function savePost(event) {
+            event.preventDefault();
+            const id = document.getElementById('post-id').value;
+            const postData = {
+                id: id ? Number(id) : Date.now(),
+                url: document.getElementById('post-url').value,
+                image: document.getElementById('post-image').value || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop',
+                date: document.getElementById('post-date').value,
+                platform: document.getElementById('post-platform').value,
+                caption: document.getElementById('post-caption').value,
+                reach: Number(document.getElementById('stat-reach-input').value),
+                likes: Number(document.getElementById('stat-likes-input').value),
+                comments: Number(document.getElementById('stat-comments-input').value),
+                saves: Number(document.getElementById('stat-saves-input').value),
+                clicks: Number(document.getElementById('stat-clicks-input').value)
+            };
+
+            if (id) {
+                const index = posts.findIndex(p => p.id === Number(id));
+                if (index !== -1) posts[index] = postData;
+            } else {
+                posts.unshift(postData);
+            }
+
+            localStorage.setItem('esencia_posts', JSON.stringify(posts));
+            closeModal();
+            renderPosts();
+            updateStats();
+        }
+
+        function deletePost(id) {
+            if (confirm('¿Estás segura de eliminar esta publicación del tablero?')) {
+                posts = posts.filter(p => p.id !== id);
+                localStorage.setItem('esencia_posts', JSON.stringify(posts));
+                renderPosts();
+                updateStats();
+            }
+        }
+
+        function renderPosts() {
+            const grid = document.getElementById('posts-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            if (posts.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            posts.forEach(post => {
+                const totalInteractions = post.likes + post.comments + post.saves;
+                const engagementRate = post.reach > 0 ? ((totalInteractions / post.reach) * 100).toFixed(1) : 0;
+
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between';
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="relative h-48 bg-pink-100 overflow-hidden">
+                            <img src="${post.image}" alt="Post preview" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop'">
+                            <span class="absolute top-3 left-3 bg-white/95 backdrop-blur text-brand-dark text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
+                                ${post.platform}
+                            </span>
+                            <span class="absolute top-3 right-3 bg-brand-gold text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+                                ${post.date || 'Sin fecha'}
+                            </span>
+                        </div>
+
+                        <div class="p-5">
+                            <p class="text-xs text-gray-500 line-clamp-2 mb-4">${post.caption || 'Sin descripción guardada...'}</p>
+
+                            <div class="grid grid-cols-3 gap-2 bg-pink-50/50 p-3 rounded-2xl border border-pink-100/60 text-center mb-4">
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Alcance</p>
+                                    <p class="text-sm font-bold text-brand-dark">${post.reach.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Likes</p>
+                                    <p class="text-sm font-bold text-brand-dark">${post.likes.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Engagement</p>
+                                    <p class="text-sm font-bold text-brand-500">${engagementRate}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-5 pb-5 pt-0 flex items-center justify-between gap-2 border-t border-pink-100/50 pt-3 mt-auto">
+                        ${post.url ? `<a href="${post.url}" target="_blank" class="text-xs text-brand-500 hover:underline font-medium flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver original</a>` : '<span></span>'}
+                        <div class="flex items-center gap-1">
+                            <button onclick="openModal(${post.id})" class="w-8 h-8 rounded-full bg-white text-gray-600 hover:text-brand-500 border border-pink-200 flex items-center justify-center transition-all text-xs" title="Editar">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deletePost(${post.id})" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-red-500 border border-pink-200 flex items-center justify-center transition-all text-xs" title="Eliminar">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateStats() {
+            const totalPosts = posts.length;
+            const totalReach = posts.reduce((acc, p) => acc + p.reach, 0);
+            const totalInteractions = posts.reduce((acc, p) => acc + p.likes + p.comments + p.saves, 0);
+            
+            let avgEngagement = 0;
+            if (totalPosts > 0) {
+                const totalEngSum = posts.reduce((acc, p) => {
+                    const ints = p.likes + p.comments + p.saves;
+                    return acc + (p.reach > 0 ? (ints / p.reach) * 100 : 0);
+                }, 0);
+                avgEngagement = (totalEngSum / totalPosts).toFixed(1);
+            }
+
+            document.getElementById('stat-total').innerText = totalPosts;
+            document.getElementById('stat-reach').innerText = totalReach.toLocaleString();
+            document.getElementById('stat-interactions').innerText = totalInteractions.toLocaleString();
+            document.getElementById('stat-engagement').innerText = avgEngagement + '%';
+        }
+
+        // Exportar directamente a formato CSV compatible con Notion
+        function exportToNotionCSV() {
+            if (posts.length === 0) {
+                alert('No hay datos para exportar.');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "Título/Copy,Plataforma,Fecha,Enlace,Portada,Alcance,Likes,Comentarios,Guardados,Clics,Engagement Rate\n";
+
+            posts.forEach(post => {
+                const totalInts = post.likes + post.comments + post.saves;
+                const engRate = post.reach > 0 ? ((totalInts / post.reach) * 100).toFixed(1) + "%" : "0%";
+                
+                // Limpiar comillas y saltos de línea para evitar romper el archivo CSV
+                const cleanCaption = `"${(post.caption || 'Publicación').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+                const cleanUrl = `"${post.url || ''}"`;
+                const cleanImage = `"${post.image || ''}"`;
+
+                const row = [
+                    cleanCaption,
+                    `"${post.platform}"`,
+                    `"${post.date}"`,
+                    cleanUrl,
+                    cleanImage,
+                    post.reach,
+                    post.likes,
+                    post.comments,
+                    post.saves,
+                    post.clicks,
+                    `"${engRate}"`
+                ].join(",");
+
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `contenido_notion_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
